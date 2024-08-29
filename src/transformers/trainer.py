@@ -2376,7 +2376,7 @@ class Trainer:
                             )
                         else:
                             _grad_norm = self.accelerator.clip_grad_norm_(
-                                model.parameters(),
+                                (p for g in self.optimizer.param_groups for p in g["params"]),
                                 args.max_grad_norm,
                             )
 
@@ -2401,7 +2401,7 @@ class Trainer:
                         if not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                             self.lr_scheduler.step()
 
-                    model.zero_grad()
+                    self.optimizer.zero_grad()
                     self.state.global_step += 1
                     self.state.epoch = epoch + (step + 1 + steps_skipped) / steps_in_epoch
                     self.control = self.callback_handler.on_step_end(args, self.state, self.control)
